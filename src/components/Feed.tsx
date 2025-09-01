@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { usePost } from '../contexts/PostContext';
 import { useUser } from '../contexts/UserContext';
 import { 
@@ -6,7 +6,6 @@ import {
   MoreHorizontal, 
   Bookmark, 
   Send,
-  Camera,
   Image as ImageIcon,
   Briefcase,
   GraduationCap,
@@ -19,12 +18,26 @@ const Feed: React.FC = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [newPostContent, setNewPostContent] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'job' | 'education' | 'technology'>('education');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCreatePost = () => {
     if (newPostContent.trim()) {
-      addPost(newPostContent, undefined, 'post', selectedCategory);
+      addPost(newPostContent, selectedImage || undefined, 'post', selectedCategory);
       setNewPostContent('');
+      setSelectedImage(null);
       setShowCreatePost(false);
+    }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSelectedImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -58,43 +71,29 @@ const Feed: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto bg-white min-h-screen">
-      {/* Stories Section */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex space-x-4 overflow-x-auto pb-2">
-          {/* Your Story */}
-          <div className="flex flex-col items-center space-y-2 flex-shrink-0">
-            <div className="relative">
-              <img
-                src={profile?.avatar || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'}
-                alt="Your story"
-                className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-              />
-              <div className="absolute bottom-0 right-0 w-5 h-5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center border-2 border-white">
-                <Plus className="w-3 h-3 text-white" />
-              </div>
-            </div>
-            <span className="text-xs text-gray-600 font-medium">Your story</span>
-          </div>
-
-          {/* Other Users' Stories */}
-          {allUsers.slice(0, 8).map((user) => (
-            <div key={user.id} className="flex flex-col items-center space-y-2 flex-shrink-0">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500">
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-full h-full rounded-full object-cover border-2 border-white"
-                  />
+      {/* Stories Section - Only Other Users */}
+      {allUsers.length > 0 && (
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex space-x-4 overflow-x-auto pb-2">
+            {allUsers.filter(user => user.id !== profile?.id).slice(0, 8).map((user) => (
+              <div key={user.id} className="flex flex-col items-center space-y-2 flex-shrink-0">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500">
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="w-full h-full rounded-full object-cover border-2 border-white"
+                    />
+                  </div>
                 </div>
+                <span className="text-xs text-gray-600 font-medium truncate w-16 text-center">
+                  {user.name.split(' ')[0]}
+                </span>
               </div>
-              <span className="text-xs text-gray-600 font-medium truncate w-16 text-center">
-                {user.name.split(' ')[0]}
-              </span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Create Post Button */}
       <div className="p-4 border-b border-gray-100">
@@ -228,7 +227,11 @@ const Feed: React.FC = () => {
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900">Create Post</h2>
                 <button
-                  onClick={() => setShowCreatePost(false)}
+                  onClick={() => {
+                    setShowCreatePost(false);
+                    setSelectedImage(null);
+                    setNewPostContent('');
+                  }}
                   className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
                 >
                   ×
@@ -264,16 +267,38 @@ const Feed: React.FC = () => {
                 placeholder="Share your knowledge, ask questions, or post opportunities..."
               />
 
+              {selectedImage && (
+                <div className="relative">
+                  <img
+                    src={selectedImage}
+                    alt="Selected"
+                    className="w-full h-48 object-cover rounded-2xl"
+                  />
+                  <button
+                    onClick={() => setSelectedImage(null)}
+                    className="absolute top-2 right-2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <div className="flex space-x-4">
-                  <button className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors">
-                    <Camera className="w-5 h-5" />
-                    <span className="text-sm font-medium">Photo</span>
-                  </button>
-                  <button className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors">
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
+                  >
                     <ImageIcon className="w-5 h-5" />
                     <span className="text-sm font-medium">Gallery</span>
                   </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
                 </div>
                 
                 <button

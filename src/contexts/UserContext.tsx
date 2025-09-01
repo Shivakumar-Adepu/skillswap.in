@@ -23,6 +23,7 @@ interface UserProfile {
   joinedAt: string;
   lastActive: string;
   isOnline: boolean;
+  isSwappingWith: string[];
 }
 
 interface PublicUser {
@@ -39,6 +40,7 @@ interface PublicUser {
   badges: string[];
   isOnline: boolean;
   lastActive: string;
+  isSwappingWith: string[];
 }
 
 interface ChatUser {
@@ -49,6 +51,7 @@ interface ChatUser {
   time: string;
   unread: number;
   isOnline: boolean;
+  isTyping: boolean;
 }
 
 interface UserContextType {
@@ -60,6 +63,9 @@ interface UserContextType {
   spendSkillCoins: (amount: number) => boolean;
   getUserById: (id: string) => PublicUser | null;
   addChatUser: (userId: string) => void;
+  toggleSwap: (userId: string) => void;
+  searchUsers: (query: string) => PublicUser[];
+  updateUserPresence: (isOnline: boolean) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -80,34 +86,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (user) {
-      // Load or create user profile
-      const savedProfile = localStorage.getItem(`skillswape_profile_${user.id}`);
-      if (savedProfile) {
-        setProfile(JSON.parse(savedProfile));
-      } else {
-        // Create new profile
-        const newProfile: UserProfile = {
-          id: user.id,
-          name: user.name,
-          bio: '',
-          avatar: `https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150&h=150`,
-          skillCoins: 100,
-          level: 1,
-          badges: ['Newcomer'],
-          teachSkills: [],
-          learnSkills: [],
-          swappers: 0,
-          swapping: 0,
-          joinedAt: new Date().toISOString(),
-          lastActive: new Date().toISOString(),
-          isOnline: true
-        };
-        setProfile(newProfile);
-      }
-      
-      // Load all users and chat users
+      loadOrCreateProfile();
       loadAllUsers();
       loadChatUsers();
+      updateUserPresence(true);
     } else {
       setProfile(null);
       setAllUsers([]);
@@ -118,10 +100,48 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (profile) {
       localStorage.setItem(`skillswape_profile_${profile.id}`, JSON.stringify(profile));
-      // Update user in all users list
       updateUserInAllUsers(profile);
     }
   }, [profile]);
+
+  // Real-time presence simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (user) {
+        updateUserPresence(true);
+      }
+    }, 30000); // Update every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const loadOrCreateProfile = () => {
+    if (!user) return;
+    
+    const savedProfile = localStorage.getItem(`skillswape_profile_${user.id}`);
+    if (savedProfile) {
+      setProfile(JSON.parse(savedProfile));
+    } else {
+      const newProfile: UserProfile = {
+        id: user.id,
+        name: user.name,
+        bio: '',
+        avatar: `https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150&h=150`,
+        skillCoins: 100,
+        level: 1,
+        badges: ['Newcomer'],
+        teachSkills: [],
+        learnSkills: [],
+        swappers: 0,
+        swapping: 0,
+        joinedAt: new Date().toISOString(),
+        lastActive: new Date().toISOString(),
+        isOnline: true,
+        isSwappingWith: []
+      };
+      setProfile(newProfile);
+    }
+  };
 
   const loadAllUsers = () => {
     const savedUsers = localStorage.getItem('skillswape_all_users');
@@ -131,7 +151,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loadChatUsers = () => {
-    const savedChatUsers = localStorage.getItem(`skillswape_chat_users_${user?.id}`);
+    if (!user) return;
+    const savedChatUsers = localStorage.getItem(`skillswape_chat_users_${user.id}`);
     if (savedChatUsers) {
       setChatUsers(JSON.parse(savedChatUsers));
     }
@@ -145,13 +166,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       avatar: userProfile.avatar,
       teachSkills: userProfile.teachSkills,
       learnSkills: userProfile.learnSkills,
-      rating: 4.8 + Math.random() * 0.2, // Random rating between 4.8-5.0
+      rating: 4.8 + Math.random() * 0.2,
       swaps: Math.floor(Math.random() * 200) + 50,
       skillCoins: userProfile.skillCoins,
       level: userProfile.level,
       badges: userProfile.badges,
       isOnline: userProfile.isOnline,
-      lastActive: userProfile.lastActive
+      lastActive: userProfile.lastActive,
+      isSwappingWith: userProfile.isSwappingWith
     };
 
     setAllUsers(prev => {
@@ -192,6 +214,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const addChatUser = (userId: string) => {
+    if (!user) return;
+    
     const targetUser = getUserById(userId);
     if (targetUser && !chatUsers.find(chat => chat.id === userId)) {
       const newChatUser: ChatUser = {
@@ -201,12 +225,63 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lastMessage: 'Connected! Start your conversation...',
         time: 'now',
         unread: 0,
-        isOnline: targetUser.isOnline
+        isOnline: targetUser.isOnline,
+        isTyping: false
       };
       
       const updatedChatUsers = [...chatUsers, newChatUser];
       setChatUsers(updatedChatUsers);
-      localStorage.setItem(`skillswape_chat_users_${user?.id}`, JSON.stringify(updatedChatUsers));
+      localStorage.setItem(`skillswape_chat_users_${user.id}`, JSON.stringify(updatedChatUsers));
+    }
+  };
+
+  const toggleSwap = (userId: string) => {
+    if (!profile) return;
+
+    const isCurrentlySwapping = profile.isSwappingWith.includes(userId);
+    const updatedSwappingWith = isCurrentlySwapping
+      ? profile.isSwappingWith.filter(id => id !== userId)
+      : [...profile.isSwappingWith, userId];
+
+    const updatedProfile = {
+      ...profile,
+      isSwappingWith: updatedSwappingWith,
+      swapping: updatedSwappingWith.length
+    };
+
+    setProfile(updatedProfile);
+
+    // Update the target user's swappers count
+    setAllUsers(prev => prev.map(user => {
+      if (user.id === userId) {
+        return {
+          ...user,
+          swappers: isCurrentlySwapping ? user.swappers - 1 : user.swappers + 1
+        };
+      }
+      return user;
+    }));
+  };
+
+  const searchUsers = (query: string): PublicUser[] => {
+    if (!query.trim()) return allUsers;
+    
+    return allUsers.filter(user => 
+      user.name.toLowerCase().includes(query.toLowerCase()) ||
+      user.bio.toLowerCase().includes(query.toLowerCase()) ||
+      user.teachSkills.some(skill => skill.name.toLowerCase().includes(query.toLowerCase())) ||
+      user.learnSkills.some(skill => skill.name.toLowerCase().includes(query.toLowerCase()))
+    );
+  };
+
+  const updateUserPresence = (isOnline: boolean) => {
+    if (profile) {
+      const updatedProfile = {
+        ...profile,
+        isOnline,
+        lastActive: new Date().toISOString()
+      };
+      setProfile(updatedProfile);
     }
   };
 
@@ -219,7 +294,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addSkillCoins, 
       spendSkillCoins, 
       getUserById, 
-      addChatUser 
+      addChatUser,
+      toggleSwap,
+      searchUsers,
+      updateUserPresence
     }}>
       {children}
     </UserContext.Provider>
