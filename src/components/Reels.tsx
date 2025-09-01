@@ -85,7 +85,7 @@ const Reels: React.FC = () => {
           </div>
           <h3 className="text-2xl font-bold mb-4">No Sparks Yet!</h3>
           <p className="text-gray-300 mb-8 leading-relaxed">
-            Be the first to create educational content and inspire others to learn
+            Create educational content and inspire others to learn
           </p>
           <button 
             onClick={() => setShowCreateSpark(true)}
@@ -97,30 +97,37 @@ const Reels: React.FC = () => {
 
         {/* Create Spark Modal */}
         {showCreateSpark && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl w-full max-w-md max-h-[80vh] overflow-hidden">
-              <div className="p-6 border-b border-gray-100">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end">
+            <div className="bg-white rounded-t-3xl w-full max-h-[80vh] overflow-hidden">
+              <div className="p-4 border-b border-gray-100">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-gray-900">Create Spark</h2>
                   <button
                     onClick={() => {
                       setShowCreateSpark(false);
                       setSelectedVideo(null);
                       setNewSparkContent('');
                     }}
-                    className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+                    className="text-gray-600 hover:text-gray-800 font-medium"
                   >
-                    ×
+                    Cancel
+                  </button>
+                  <h2 className="text-lg font-bold text-gray-900">New Spark</h2>
+                  <button
+                    onClick={handleCreateSpark}
+                    disabled={!newSparkContent.trim()}
+                    className="text-purple-600 hover:text-purple-700 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Share
                   </button>
                 </div>
               </div>
               
-              <div className="p-6 space-y-6">
+              <div className="p-4 space-y-4">
                 <div className="flex items-center space-x-3">
                   <img
                     src={profile?.avatar || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'}
                     alt="Your avatar"
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-8 h-8 rounded-full object-cover"
                   />
                   <div>
                     <h3 className="font-semibold text-gray-900">{profile?.name}</h3>
@@ -139,8 +146,9 @@ const Reels: React.FC = () => {
                 <textarea
                   value={newSparkContent}
                   onChange={(e) => setNewSparkContent(e.target.value)}
-                  className="w-full h-24 p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
+                  className="w-full h-24 p-4 border-0 resize-none text-gray-900 placeholder-gray-500 focus:ring-0"
                   placeholder="Describe your educational spark..."
+                  autoFocus
                 />
 
                 {selectedVideo && (
@@ -159,13 +167,13 @@ const Reels: React.FC = () => {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
+                    className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors"
                   >
                     <Video className="w-5 h-5" />
-                    <span className="text-sm font-medium">Add Video (max 2 min)</span>
+                    <span className="font-medium">Gallery</span>
                   </button>
                   <input
                     ref={fileInputRef}
@@ -174,14 +182,6 @@ const Reels: React.FC = () => {
                     onChange={handleVideoSelect}
                     className="hidden"
                   />
-                  
-                  <button
-                    onClick={handleCreateSpark}
-                    disabled={!newSparkContent.trim()}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                  >
-                    Create Spark
-                  </button>
                 </div>
               </div>
             </div>
@@ -198,7 +198,7 @@ const Reels: React.FC = () => {
       {/* Create Spark Button */}
       <button
         onClick={() => setShowCreateSpark(true)}
-        className="absolute top-20 left-4 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-40"
+        className="absolute top-20 right-4 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-40"
       >
         <Plus className="w-6 h-6 text-white" />
       </button>
@@ -288,7 +288,7 @@ const Reels: React.FC = () => {
       {/* Audio Control */}
       <button
         onClick={() => setIsMuted(!isMuted)}
-        className="absolute top-20 right-4 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/50 transition-all"
+        className="absolute top-20 left-4 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/50 transition-all"
       >
         {isMuted ? (
           <VolumeX className="w-5 h-5 text-white" />
@@ -314,30 +314,37 @@ const Reels: React.FC = () => {
 
       {/* Create Spark Modal */}
       {showCreateSpark && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md max-h-[80vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end">
+          <div className="bg-white rounded-t-3xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Create Spark</h2>
                 <button
                   onClick={() => {
                     setShowCreateSpark(false);
                     setSelectedVideo(null);
                     setNewSparkContent('');
                   }}
-                  className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+                  className="text-gray-600 hover:text-gray-800 font-medium"
                 >
-                  ×
+                  Cancel
+                </button>
+                <h2 className="text-lg font-bold text-gray-900">New Spark</h2>
+                <button
+                  onClick={handleCreateSpark}
+                  disabled={!newSparkContent.trim()}
+                  className="text-purple-600 hover:text-purple-700 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Share
                 </button>
               </div>
             </div>
             
-            <div className="p-6 space-y-6">
+            <div className="p-4 space-y-4">
               <div className="flex items-center space-x-3">
                 <img
                   src={profile?.avatar || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'}
                   alt="Your avatar"
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-8 h-8 rounded-full object-cover"
                 />
                 <div>
                   <h3 className="font-semibold text-gray-900">{profile?.name}</h3>
@@ -356,8 +363,9 @@ const Reels: React.FC = () => {
               <textarea
                 value={newSparkContent}
                 onChange={(e) => setNewSparkContent(e.target.value)}
-                className="w-full h-24 p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
-                placeholder="Describe your educational spark..."
+                className="w-full h-24 p-4 border-0 resize-none text-gray-900 placeholder-gray-500 focus:ring-0"
+                placeholder="What's your spark about?"
+                autoFocus
               />
 
               {selectedVideo && (
@@ -376,13 +384,13 @@ const Reels: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <button 
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
+                  className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors"
                 >
                   <Video className="w-5 h-5" />
-                  <span className="text-sm font-medium">Add Video (max 2 min)</span>
+                  <span className="font-medium">Gallery</span>
                 </button>
                 <input
                   ref={fileInputRef}
@@ -391,14 +399,6 @@ const Reels: React.FC = () => {
                   onChange={handleVideoSelect}
                   className="hidden"
                 />
-                
-                <button
-                  onClick={handleCreateSpark}
-                  disabled={!newSparkContent.trim()}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                >
-                  Create Spark
-                </button>
               </div>
             </div>
           </div>
@@ -414,7 +414,7 @@ const Reels: React.FC = () => {
       {/* Create Spark Button */}
       <button
         onClick={() => setShowCreateSpark(true)}
-        className="absolute top-20 left-4 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-40"
+        className="absolute top-20 right-4 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-40"
       >
         <Plus className="w-6 h-6 text-white" />
       </button>
@@ -504,7 +504,7 @@ const Reels: React.FC = () => {
       {/* Audio Control */}
       <button
         onClick={() => setIsMuted(!isMuted)}
-        className="absolute top-20 right-4 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/50 transition-all"
+        className="absolute top-20 left-4 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/50 transition-all"
       >
         {isMuted ? (
           <VolumeX className="w-5 h-5 text-white" />
@@ -530,30 +530,37 @@ const Reels: React.FC = () => {
 
       {/* Create Spark Modal */}
       {showCreateSpark && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md max-h-[80vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end">
+          <div className="bg-white rounded-t-3xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Create Spark</h2>
                 <button
                   onClick={() => {
                     setShowCreateSpark(false);
                     setSelectedVideo(null);
                     setNewSparkContent('');
                   }}
-                  className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+                  className="text-gray-600 hover:text-gray-800 font-medium"
                 >
-                  ×
+                  Cancel
+                </button>
+                <h2 className="text-lg font-bold text-gray-900">New Spark</h2>
+                <button
+                  onClick={handleCreateSpark}
+                  disabled={!newSparkContent.trim()}
+                  className="text-purple-600 hover:text-purple-700 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Share
                 </button>
               </div>
             </div>
             
-            <div className="p-6 space-y-6">
+            <div className="p-4 space-y-4">
               <div className="flex items-center space-x-3">
                 <img
                   src={profile?.avatar || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'}
                   alt="Your avatar"
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-8 h-8 rounded-full object-cover"
                 />
                 <div>
                   <h3 className="font-semibold text-gray-900">{profile?.name}</h3>
@@ -572,8 +579,9 @@ const Reels: React.FC = () => {
               <textarea
                 value={newSparkContent}
                 onChange={(e) => setNewSparkContent(e.target.value)}
-                className="w-full h-24 p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
-                placeholder="Describe your educational spark..."
+                className="w-full h-24 p-4 border-0 resize-none text-gray-900 placeholder-gray-500 focus:ring-0"
+                placeholder="What's your spark about?"
+                autoFocus
               />
 
               {selectedVideo && (
@@ -592,13 +600,13 @@ const Reels: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <button 
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
+                  className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors"
                 >
                   <Video className="w-5 h-5" />
-                  <span className="text-sm font-medium">Add Video (max 2 min)</span>
+                  <span className="font-medium">Gallery</span>
                 </button>
                 <input
                   ref={fileInputRef}
@@ -607,14 +615,6 @@ const Reels: React.FC = () => {
                   onChange={handleVideoSelect}
                   className="hidden"
                 />
-                
-                <button
-                  onClick={handleCreateSpark}
-                  disabled={!newSparkContent.trim()}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                >
-                  Create Spark
-                </button>
               </div>
             </div>
           </div>
@@ -624,4 +624,4 @@ const Reels: React.FC = () => {
   );
 };
 
-export default Reels;
+export default Profile;

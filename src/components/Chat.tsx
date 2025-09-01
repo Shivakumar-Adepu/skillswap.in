@@ -1,238 +1,261 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Send, Calendar, Video, Paperclip, Smile, MessageCircle, Users } from 'lucide-react';
+import { Send, Video, Paperclip, Smile, MessageCircle, Users, ArrowLeft } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
 
-const MOCK_MESSAGES = [
-  {
-    id: '1',
-    sender: 'other',
-    content: 'Hey! Thanks for connecting. I\'m excited to start swapping skills with you!',
-    time: '10:30 AM',
-    type: 'text'
-  },
-  {
-    id: '2',
-    sender: 'me',
-    content: 'Awesome! I\'m looking forward to learning from you too. What time works best for our first session?',
-    time: '10:32 AM',
-    type: 'text'
-  },
-  {
-    id: '3',
-    sender: 'other',
-    content: 'How about tomorrow at 3 PM? We can start with the basics and see how it goes.',
-    time: '10:35 AM',
-    type: 'text'
-  },
-  {
-    id: '4',
-    sender: 'me',
-    content: 'Perfect! I\'ll send you a calendar invite.',
-    time: '10:36 AM',
-    type: 'text'
-  }
-];
+interface Message {
+  id: string;
+  senderId: string;
+  content: string;
+  timestamp: string;
+  type: 'text' | 'image' | 'file';
+  status: 'sent' | 'delivered' | 'read';
+}
 
 const Chat: React.FC = () => {
   const { chatId } = useParams();
-  const { chatUsers, getUserById } = useUser();
+  const { chatUsers, getUserById, profile } = useUser();
   const [message, setMessage] = useState('');
-  const [selectedChat, setSelectedChat] = useState(chatId || '1');
+  const [selectedChat, setSelectedChat] = useState(chatId || (chatUsers.length > 0 ? chatUsers[0].id : ''));
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
 
   const currentChat = chatUsers.find(chat => chat.id === selectedChat);
   const currentUser = currentChat ? getUserById(currentChat.id) : null;
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim()) {
-      // Add message logic here
+    if (message.trim() && selectedChat) {
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        senderId: profile?.id || '',
+        content: message.trim(),
+        timestamp: new Date().toISOString(),
+        type: 'text',
+        status: 'sent'
+      };
+      
+      setMessages(prev => [...prev, newMessage]);
       setMessage('');
+      
+      // Simulate message delivery
+      setTimeout(() => {
+        setMessages(prev => prev.map(msg => 
+          msg.id === newMessage.id ? { ...msg, status: 'delivered' } : msg
+        ));
+      }, 1000);
     }
   };
 
-  return (
-    <div className="max-w-7xl mx-auto p-4">
-      <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 h-[calc(100vh-200px)] flex overflow-hidden">
-        {/* Chat List */}
-        <div className="w-full md:w-1/3 border-r border-gray-100 flex flex-col bg-gray-50">
-          <div className="p-6 border-b border-gray-200 bg-white">
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-              <MessageCircle className="w-6 h-6 text-purple-600 mr-2" />
-              Messages
-            </h2>
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Mobile view - show chat list or conversation
+  const [showChatList, setShowChatList] = useState(!chatId);
+
+  if (chatUsers.length === 0) {
+    return (
+      <div className="max-w-md mx-auto bg-white min-h-screen flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="w-20 h-20 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <MessageCircle className="w-10 h-10 text-purple-600" />
           </div>
-          
-          <div className="flex-1 overflow-y-auto p-2">
-            {chatUsers.length > 0 ? chatUsers.map(chat => (
-              <button
-                key={chat.id}
-                onClick={() => setSelectedChat(chat.id)}
-                className={`w-full p-4 text-left hover:bg-white transition-all duration-200 rounded-2xl m-1 ${
-                  selectedChat === chat.id ? 'bg-white shadow-lg border-2 border-purple-200' : 'hover:shadow-md'
-                }`}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <img
-                      src={chat.avatar}
-                      alt={chat.name}
-                      className="w-14 h-14 rounded-full object-cover ring-2 ring-white shadow-md"
-                    />
-                    {chat.isOnline && (
-                      <div className="absolute bottom-0 right-0 w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-bold text-gray-900 truncate">{chat.name}</h3>
-                      <span className="text-xs text-gray-500 font-medium">{chat.time}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-gray-600 text-sm truncate font-medium">{chat.lastMessage}</p>
-                      {chat.unread > 0 && (
-                        <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
-                          {chat.unread}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </button>
-            )) : (
-              <div className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="font-bold text-gray-900 mb-2">No conversations yet</h3>
-                <p className="text-gray-600 text-sm mb-4">Start connecting with skill partners to begin chatting</p>
-                <Link 
-                  to="/search"
-                  className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all font-semibold"
-                >
-                  <Users className="w-4 h-4" />
-                  <span>Find Partners</span>
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Chat Area */}
-        <div className="flex-1 flex flex-col">
-          {currentChat && currentUser ? (
-            <>
-              {/* Chat Header */}
-              <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-white">
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                  <img
-                      src={currentChat.avatar}
-                      alt={currentChat.name}
-                      className="w-12 h-12 rounded-full object-cover ring-2 ring-purple-100 shadow-md"
-                    />
-                    {currentChat.isOnline && (
-                      <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-lg">{currentChat.name}</h3>
-                    <p className={`text-sm font-medium ${currentChat.isOnline ? 'text-green-600' : 'text-gray-500'}`}>
-                      {currentChat.isOnline ? '🟢 Online now' : 'Last seen 1h ago'}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex space-x-3">
-                  <button className="p-3 text-gray-600 hover:text-gray-800 hover:bg-purple-50 rounded-xl transition-all">
-                    <Calendar className="w-6 h-6" />
-                  </button>
-                  <button className="p-3 text-gray-600 hover:text-gray-800 hover:bg-purple-50 rounded-xl transition-all">
-                    <Video className="w-6 h-6" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-gray-50 to-white">
-                {MOCK_MESSAGES.map(msg => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div className={`max-w-xs lg:max-w-md px-5 py-4 rounded-2xl shadow-md ${
-                      msg.sender === 'me'
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                        : 'bg-white text-gray-900 border border-gray-200'
-                    }`}>
-                      <p className="font-medium">{msg.content}</p>
-                      <p className={`text-xs mt-2 ${
-                        msg.sender === 'me' ? 'text-purple-200' : 'text-gray-500'
-                      }`}>
-                        {msg.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Message Input */}
-              <form onSubmit={handleSendMessage} className="p-6 border-t border-gray-200 bg-white">
-                <div className="flex items-center space-x-4">
-                  <button
-                    type="button"
-                    className="p-3 text-gray-600 hover:text-gray-800 hover:bg-purple-50 rounded-xl transition-all"
-                  >
-                    <Paperclip className="w-6 h-6" />
-                  </button>
-                  
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all pr-14 text-lg placeholder-gray-400"
-                      placeholder="Type your message... 💬"
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 text-gray-600 hover:text-gray-800 transition-colors hover:bg-gray-100 rounded-lg"
-                    >
-                      <Smile className="w-5 h-5" />
-                    </button>
-                  </div>
-                  
-                  <button
-                    type="submit"
-                    disabled={!message.trim()}
-                    className="p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 shadow-lg"
-                  >
-                    <Send className="w-6 h-6" />
-                  </button>
-                </div>
-              </form>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-center bg-gradient-to-br from-gray-50 to-purple-50">
-              <div>
-                <div className="w-24 h-24 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                  <MessageCircle className="w-12 h-12 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Start a conversation</h3>
-                <p className="text-gray-600 text-lg mb-6">Connect with skill partners to begin chatting</p>
-                <Link 
-                  to="/search"
-                  className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 font-semibold shadow-lg"
-                >
-                  <Users className="w-5 h-5" />
-                  <span>Find Partners</span>
-                </Link>
-              </div>
-            </div>
-          )}
+          <h3 className="text-xl font-bold text-gray-900 mb-3">No conversations yet</h3>
+          <p className="text-gray-600 mb-6">Start connecting with skill partners to begin chatting</p>
+          <Link 
+            to="/search"
+            className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 font-bold shadow-lg"
+          >
+            <Users className="w-5 h-5" />
+            <span>Find Partners</span>
+          </Link>
         </div>
       </div>
+    );
+  }
+
+  // Mobile: Show chat list
+  if (showChatList || !selectedChat) {
+    return (
+      <div className="max-w-md mx-auto bg-white min-h-screen">
+        <div className="p-4 border-b border-gray-100">
+          <h2 className="text-xl font-bold text-gray-900">Messages</h2>
+        </div>
+        
+        <div className="divide-y divide-gray-100">
+          {chatUsers.map(chat => (
+            <button
+              key={chat.id}
+              onClick={() => {
+                setSelectedChat(chat.id);
+                setShowChatList(false);
+              }}
+              className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <img
+                    src={chat.avatar}
+                    alt={chat.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  {chat.isOnline && (
+                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="font-semibold text-gray-900 truncate">{chat.name}</h3>
+                    <span className="text-xs text-gray-500">{chat.time}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-gray-600 text-sm truncate">{chat.lastMessage}</p>
+                    {chat.unread > 0 && (
+                      <div className="w-5 h-5 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                        {chat.unread}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Mobile: Show conversation
+  return (
+    <div className="max-w-md mx-auto bg-white min-h-screen flex flex-col">
+      {/* Chat Header */}
+      <div className="p-4 border-b border-gray-100 flex items-center space-x-3 bg-white">
+        <button
+          onClick={() => setShowChatList(true)}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 text-gray-600" />
+        </button>
+        
+        {currentUser && (
+          <>
+            <div className="relative">
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+              {currentUser.isOnline && (
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+              )}
+            </div>
+            
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900">{currentUser.name}</h3>
+              <p className={`text-xs ${currentUser.isOnline ? 'text-green-600' : 'text-gray-500'}`}>
+                {currentUser.isOnline ? 'Online' : 'Last seen recently'}
+              </p>
+            </div>
+            
+            <button className="p-2 text-purple-600 hover:bg-purple-50 rounded-full transition-colors">
+              <Video className="w-5 h-5" />
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+        {messages.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MessageCircle className="w-8 h-8 text-purple-600" />
+            </div>
+            <p className="text-gray-600">Start your conversation!</p>
+          </div>
+        ) : (
+          messages.map(msg => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.senderId === profile?.id ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className={`max-w-xs px-4 py-2 rounded-2xl ${
+                msg.senderId === profile?.id
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-white text-gray-900 border border-gray-200'
+              }`}>
+                <p>{msg.content}</p>
+                <div className="flex items-center justify-between mt-1">
+                  <p className={`text-xs ${
+                    msg.senderId === profile?.id ? 'text-purple-200' : 'text-gray-500'
+                  }`}>
+                    {formatTime(msg.timestamp)}
+                  </p>
+                  {msg.senderId === profile?.id && (
+                    <span className={`text-xs ${
+                      msg.status === 'read' ? 'text-blue-300' :
+                      msg.status === 'delivered' ? 'text-purple-200' : 'text-purple-300'
+                    }`}>
+                      {msg.status === 'read' ? '✓✓' : msg.status === 'delivered' ? '✓✓' : '✓'}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+        
+        {isTyping && (
+          <div className="flex justify-start">
+            <div className="bg-white border border-gray-200 px-4 py-2 rounded-2xl">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Message Input */}
+      <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-100 bg-white">
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <Paperclip className="w-5 h-5" />
+          </button>
+          
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-200 rounded-full focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all pr-12"
+              placeholder="Message..."
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <Smile className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <button
+            type="submit"
+            disabled={!message.trim()}
+            className="p-3 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

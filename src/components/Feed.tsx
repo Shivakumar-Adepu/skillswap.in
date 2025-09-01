@@ -9,7 +9,8 @@ import {
   Image as ImageIcon,
   Briefcase,
   GraduationCap,
-  Cpu
+  Cpu,
+  Camera
 } from 'lucide-react';
 
 const Feed: React.FC = () => {
@@ -43,10 +44,10 @@ const Feed: React.FC = () => {
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'job': return <Briefcase className="w-4 h-4" />;
-      case 'education': return <GraduationCap className="w-4 h-4" />;
-      case 'technology': return <Cpu className="w-4 h-4" />;
-      default: return <GraduationCap className="w-4 h-4" />;
+      case 'job': return <Briefcase className="w-3 h-3" />;
+      case 'education': return <GraduationCap className="w-3 h-3" />;
+      case 'technology': return <Cpu className="w-3 h-3" />;
+      default: return <GraduationCap className="w-3 h-3" />;
     }
   };
 
@@ -62,20 +63,21 @@ const Feed: React.FC = () => {
   const formatTime = (dateString: string) => {
     const now = new Date();
     const postDate = new Date(dateString);
-    const diffInHours = Math.floor((now.getTime() - postDate.getTime()) / (1000 * 60 * 60));
+    const diffInMinutes = Math.floor((now.getTime() - postDate.getTime()) / (1000 * 60));
     
-    if (diffInHours < 1) return 'now';
-    if (diffInHours < 24) return `${diffInHours}h`;
-    return `${Math.floor(diffInHours / 24)}d`;
+    if (diffInMinutes < 1) return 'now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h`;
+    return `${Math.floor(diffInMinutes / 1440)}d`;
   };
 
   return (
     <div className="max-w-md mx-auto bg-white min-h-screen">
-      {/* Stories Section - Only Other Users */}
+      {/* Stories Section - Other Users Only */}
       {allUsers.length > 0 && (
         <div className="p-4 border-b border-gray-100">
           <div className="flex space-x-4 overflow-x-auto pb-2">
-            {allUsers.filter(user => user.id !== profile?.id).slice(0, 8).map((user) => (
+            {allUsers.slice(0, 10).map((user) => (
               <div key={user.id} className="flex flex-col items-center space-y-2 flex-shrink-0">
                 <div className="relative">
                   <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500">
@@ -85,6 +87,9 @@ const Feed: React.FC = () => {
                       className="w-full h-full rounded-full object-cover border-2 border-white"
                     />
                   </div>
+                  {user.isOnline && (
+                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                  )}
                 </div>
                 <span className="text-xs text-gray-600 font-medium truncate w-16 text-center">
                   {user.name.split(' ')[0]}
@@ -99,14 +104,14 @@ const Feed: React.FC = () => {
       <div className="p-4 border-b border-gray-100">
         <button
           onClick={() => setShowCreatePost(true)}
-          className="w-full flex items-center space-x-3 p-4 bg-gradient-to-r from-gray-50 to-purple-50 rounded-2xl hover:from-purple-50 hover:to-pink-50 transition-all border border-gray-200 hover:border-purple-200"
+          className="w-full flex items-center space-x-3 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors"
         >
           <img
             src={profile?.avatar || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'}
             alt="Your avatar"
-            className="w-10 h-10 rounded-full object-cover"
+            className="w-8 h-8 rounded-full object-cover"
           />
-          <span className="text-gray-600 font-medium">Share your knowledge...</span>
+          <span className="text-gray-600 font-medium">What's on your mind?</span>
         </button>
       </div>
 
@@ -120,23 +125,23 @@ const Feed: React.FC = () => {
                 <img
                   src={post.userAvatar}
                   alt={post.userName}
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-8 h-8 rounded-full object-cover"
                 />
                 <div>
                   <div className="flex items-center space-x-2">
                     <h3 className="font-semibold text-gray-900 text-sm">{post.userName}</h3>
-                    <div className={`px-2 py-1 bg-gradient-to-r ${getCategoryColor(post.category)} rounded-full flex items-center space-x-1`}>
+                    <div className={`px-2 py-0.5 bg-gradient-to-r ${getCategoryColor(post.category)} rounded-full flex items-center space-x-1`}>
                       <div className="text-white">
                         {getCategoryIcon(post.category)}
                       </div>
-                      <span className="text-white text-xs font-bold capitalize">{post.category}</span>
+                      <span className="text-white text-xs font-medium capitalize">{post.category}</span>
                     </div>
                   </div>
                   <p className="text-xs text-gray-500">{formatTime(post.createdAt)}</p>
                 </div>
               </div>
               <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                <MoreHorizontal className="w-4 h-4 text-gray-600" />
               </button>
             </div>
 
@@ -147,11 +152,11 @@ const Feed: React.FC = () => {
 
             {/* Post Image */}
             {post.image && (
-              <div className="px-4 pb-3">
+              <div className="mb-3">
                 <img
                   src={post.image}
                   alt="Post content"
-                  className="w-full rounded-2xl object-cover max-h-96"
+                  className="w-full object-cover max-h-96"
                 />
               </div>
             )}
@@ -162,7 +167,7 @@ const Feed: React.FC = () => {
                 <div className="flex items-center space-x-6">
                   <button
                     onClick={() => toggleClap(post.id)}
-                    className={`flex items-center space-x-2 transition-all transform hover:scale-110 ${
+                    className={`flex items-center space-x-2 transition-all ${
                       post.hasClapped ? 'text-orange-500' : 'text-gray-600 hover:text-orange-500'
                     }`}
                   >
@@ -172,7 +177,7 @@ const Feed: React.FC = () => {
                   
                   <button
                     onClick={() => toggleDrop(post.id)}
-                    className={`flex items-center space-x-2 transition-all transform hover:scale-110 ${
+                    className={`flex items-center space-x-2 transition-all ${
                       post.hasDropped ? 'text-blue-500' : 'text-gray-600 hover:text-blue-500'
                     }`}
                   >
@@ -182,7 +187,7 @@ const Feed: React.FC = () => {
                   
                   <button
                     onClick={() => toggleSpread(post.id)}
-                    className={`flex items-center space-x-2 transition-all transform hover:scale-110 ${
+                    className={`flex items-center space-x-2 transition-all ${
                       post.hasSpread ? 'text-green-500' : 'text-gray-600 hover:text-green-500'
                     }`}
                   >
@@ -191,14 +196,9 @@ const Feed: React.FC = () => {
                   </button>
                 </div>
                 
-                <div className="flex items-center space-x-4">
-                  <button className="text-gray-600 hover:text-gray-800 transition-colors">
-                    <Send className="w-5 h-5" />
-                  </button>
-                  <button className="text-gray-600 hover:text-gray-800 transition-colors">
-                    <Bookmark className="w-5 h-5" />
-                  </button>
-                </div>
+                <button className="text-gray-600 hover:text-gray-800 transition-colors">
+                  <Bookmark className="w-5 h-5" />
+                </button>
               </div>
             </div>
           </div>
@@ -221,30 +221,37 @@ const Feed: React.FC = () => {
 
       {/* Create Post Modal */}
       {showCreatePost && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4">
-          <div className="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[80vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end">
+          <div className="bg-white rounded-t-3xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Create Post</h2>
                 <button
                   onClick={() => {
                     setShowCreatePost(false);
                     setSelectedImage(null);
                     setNewPostContent('');
                   }}
-                  className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+                  className="text-gray-600 hover:text-gray-800 font-medium"
                 >
-                  ×
+                  Cancel
+                </button>
+                <h2 className="text-lg font-bold text-gray-900">New Post</h2>
+                <button
+                  onClick={handleCreatePost}
+                  disabled={!newPostContent.trim()}
+                  className="text-purple-600 hover:text-purple-700 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Share
                 </button>
               </div>
             </div>
             
-            <div className="p-6 space-y-6">
+            <div className="p-4 space-y-4">
               <div className="flex items-center space-x-3">
                 <img
                   src={profile?.avatar || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'}
                   alt="Your avatar"
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-8 h-8 rounded-full object-cover"
                 />
                 <div>
                   <h3 className="font-semibold text-gray-900">{profile?.name}</h3>
@@ -263,8 +270,9 @@ const Feed: React.FC = () => {
               <textarea
                 value={newPostContent}
                 onChange={(e) => setNewPostContent(e.target.value)}
-                className="w-full h-32 p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
-                placeholder="Share your knowledge, ask questions, or post opportunities..."
+                className="w-full h-32 p-4 border-0 resize-none text-gray-900 placeholder-gray-500 focus:ring-0"
+                placeholder="What's happening in your learning journey?"
+                autoFocus
               />
 
               {selectedImage && (
@@ -283,31 +291,21 @@ const Feed: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex items-center justify-between">
-                <div className="flex space-x-4">
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
-                  >
-                    <ImageIcon className="w-5 h-5" />
-                    <span className="text-sm font-medium">Gallery</span>
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                  />
-                </div>
-                
-                <button
-                  onClick={handleCreatePost}
-                  disabled={!newPostContent.trim()}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors"
                 >
-                  Share
+                  <ImageIcon className="w-5 h-5" />
+                  <span className="font-medium">Gallery</span>
                 </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
               </div>
             </div>
           </div>

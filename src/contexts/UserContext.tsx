@@ -66,6 +66,7 @@ interface UserContextType {
   toggleSwap: (userId: string) => void;
   searchUsers: (query: string) => PublicUser[];
   updateUserPresence: (isOnline: boolean) => void;
+  refreshUsers: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -109,8 +110,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const interval = setInterval(() => {
       if (user) {
         updateUserPresence(true);
+        refreshUsers();
       }
-    }, 30000); // Update every 30 seconds
+    }, 5000); // Update every 5 seconds for real-time feel
 
     return () => clearInterval(interval);
   }, [user]);
@@ -146,8 +148,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loadAllUsers = () => {
     const savedUsers = localStorage.getItem('skillswape_all_users');
     if (savedUsers) {
-      setAllUsers(JSON.parse(savedUsers));
+      const users = JSON.parse(savedUsers);
+      // Filter out current user and update online status
+      const filteredUsers = users.filter((u: PublicUser) => u.id !== user?.id);
+      setAllUsers(filteredUsers);
     }
+  };
+
+  const refreshUsers = () => {
+    loadAllUsers();
   };
 
   const loadChatUsers = () => {
@@ -167,7 +176,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       teachSkills: userProfile.teachSkills,
       learnSkills: userProfile.learnSkills,
       rating: 4.8 + Math.random() * 0.2,
-      swaps: Math.floor(Math.random() * 200) + 50,
+      swaps: Math.floor(Math.random() * 50) + 10,
       skillCoins: userProfile.skillCoins,
       level: userProfile.level,
       badges: userProfile.badges,
@@ -176,12 +185,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isSwappingWith: userProfile.isSwappingWith
     };
 
-    setAllUsers(prev => {
-      const filtered = prev.filter(u => u.id !== userProfile.id);
-      const updated = [...filtered, publicUser];
-      localStorage.setItem('skillswape_all_users', JSON.stringify(updated));
-      return updated;
-    });
+    // Get existing users and update/add current user
+    const savedUsers = localStorage.getItem('skillswape_all_users');
+    const existingUsers = savedUsers ? JSON.parse(savedUsers) : [];
+    const filteredUsers = existingUsers.filter((u: PublicUser) => u.id !== userProfile.id);
+    const updatedUsers = [...filteredUsers, publicUser];
+    
+    localStorage.setItem('skillswape_all_users', JSON.stringify(updatedUsers));
+    
+    // Update state with users excluding current user
+    setAllUsers(updatedUsers.filter(u => u.id !== userProfile.id));
   };
 
   const updateProfile = (updates: Partial<UserProfile>) => {
@@ -251,16 +264,22 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setProfile(updatedProfile);
 
-    // Update the target user's swappers count
-    setAllUsers(prev => prev.map(user => {
-      if (user.id === userId) {
-        return {
-          ...user,
-          swappers: isCurrentlySwapping ? user.swappers - 1 : user.swappers + 1
-        };
-      }
-      return user;
-    }));
+    // Update the target user's swappers count in localStorage
+    const savedUsers = localStorage.getItem('skillswape_all_users');
+    if (savedUsers) {
+      const users = JSON.parse(savedUsers);
+      const updatedUsers = users.map((u: PublicUser) => {
+        if (u.id === userId) {
+          return {
+            ...u,
+            swappers: isCurrentlySwapping ? u.swappers - 1 : u.swappers + 1
+          };
+        }
+        return u;
+      });
+      localStorage.setItem('skillswape_all_users', JSON.stringify(updatedUsers));
+      setAllUsers(updatedUsers.filter(u => u.id !== profile.id));
+    }
   };
 
   const searchUsers = (query: string): PublicUser[] => {
@@ -297,7 +316,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addChatUser,
       toggleSwap,
       searchUsers,
-      updateUserPresence
+      updateUserPresence,
+      refreshUsers
     }}>
       {children}
     </UserContext.Provider>

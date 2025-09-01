@@ -4,18 +4,19 @@ import { useUser } from '../contexts/UserContext';
 import { Link } from 'react-router-dom';
 
 const Search: React.FC = () => {
-  const { profile, searchUsers, toggleSwap, addChatUser } = useUser();
+  const { profile, searchUsers, toggleSwap, addChatUser, allUsers } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
   useEffect(() => {
     if (searchQuery.trim()) {
       const results = searchUsers(searchQuery);
-      setSearchResults(results.filter(user => user.id !== profile?.id));
+      setSearchResults(results);
     } else {
-      setSearchResults([]);
+      // Show all users when no search query
+      setSearchResults(allUsers);
     }
-  }, [searchQuery, searchUsers, profile?.id]);
+  }, [searchQuery, searchUsers, allUsers]);
 
   const handleSwap = (userId: string) => {
     toggleSwap(userId);
@@ -47,27 +48,31 @@ const Search: React.FC = () => {
       </div>
 
       {/* Search Results */}
-      <div className="p-4">
-        {searchQuery.trim() === '' ? (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <SearchIcon className="w-10 h-10 text-purple-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Search for People</h3>
-            <p className="text-gray-600">Find skill partners by name or expertise</p>
-          </div>
-        ) : searchResults.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
-              <SearchIcon className="w-10 h-10 text-gray-400" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No results found</h3>
-            <p className="text-gray-600">Try searching for different names or skills</p>
+      <div className="divide-y divide-gray-100">
+        {searchResults.length === 0 ? (
+          <div className="text-center py-16 px-4">
+            {searchQuery.trim() === '' ? (
+              <>
+                <div className="w-20 h-20 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <SearchIcon className="w-10 h-10 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Discover People</h3>
+                <p className="text-gray-600">Search for skill partners by name or expertise</p>
+              </>
+            ) : (
+              <>
+                <div className="w-20 h-20 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <SearchIcon className="w-10 h-10 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">No results found</h3>
+                <p className="text-gray-600">Try searching for different names or skills</p>
+              </>
+            )}
           </div>
         ) : (
-          <div className="space-y-3">
-            {searchResults.map(user => (
-              <div key={user.id} className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-2xl transition-all">
+          searchResults.map(user => (
+            <div key={user.id} className="p-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center space-x-3">
                 {/* Left: Avatar */}
                 <Link to={`/profile/${user.id}`}>
                   <div className="relative">
@@ -82,41 +87,31 @@ const Search: React.FC = () => {
                   </div>
                 </Link>
 
-                {/* Center: Name and Bio */}
+                {/* Center: Name */}
                 <Link to={`/profile/${user.id}`} className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">{user.name}</h3>
-                  <p className="text-sm text-gray-600 truncate">{user.bio || 'Passionate about learning and teaching'}</p>
+                  <h3 className="font-semibold text-gray-900">{user.name}</h3>
+                  <p className="text-sm text-gray-600 truncate">
+                    {user.teachSkills.length > 0 
+                      ? `Teaches ${user.teachSkills.slice(0, 2).map(s => s.name).join(', ')}`
+                      : 'New to SkillSwape'
+                    }
+                  </p>
                 </Link>
 
-                {/* Right: Action Buttons */}
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handleMessage(user.id)}
-                    className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-all"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                  </button>
-                  
-                  <button
-                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
-                  >
-                    <Video className="w-5 h-5" />
-                  </button>
-
-                  <button
-                    onClick={() => handleSwap(user.id)}
-                    className={`px-4 py-2 rounded-full font-semibold transition-all ${
-                      isSwapping(user.id)
-                        ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        : 'bg-purple-600 text-white hover:bg-purple-700'
-                    }`}
-                  >
-                    {isSwapping(user.id) ? 'Swapping' : 'Swap'}
-                  </button>
-                </div>
+                {/* Right: Swap Button */}
+                <button
+                  onClick={() => handleSwap(user.id)}
+                  className={`px-6 py-2 rounded-full font-semibold transition-all ${
+                    isSwapping(user.id)
+                      ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      : 'bg-purple-600 text-white hover:bg-purple-700'
+                  }`}
+                >
+                  {isSwapping(user.id) ? 'Swapping' : 'Swap'}
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))
         )}
       </div>
     </div>

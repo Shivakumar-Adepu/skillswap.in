@@ -1,214 +1,259 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { MessageCircle, Star, Zap, Award, Users, Settings, Share2 } from 'lucide-react';
+import { usePost } from '../contexts/PostContext';
+import { MessageCircle, Video, Star, Zap, Award, Users, Settings, Share2, Grid, Play } from 'lucide-react';
 
 const Profile: React.FC = () => {
   const { userId } = useParams();
-  const { profile } = useUser();
+  const { profile, getUserById, toggleSwap, addChatUser } = useUser();
+  const { posts, reels } = usePost();
+  const [activeTab, setActiveTab] = useState<'posts' | 'sparks'>('posts');
   
-  // For MVP, we'll show the current user's profile
   const isOwnProfile = !userId || userId === profile?.id;
-  const displayProfile = profile;
+  const displayProfile = isOwnProfile ? profile : getUserById(userId);
 
-  if (!displayProfile) return null;
+  if (!displayProfile) {
+    return (
+      <div className="max-w-md mx-auto bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Users className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">User not found</h3>
+          <Link to="/search" className="text-purple-600 hover:text-purple-700 font-medium">
+            Back to search
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const isSwapping = profile?.isSwappingWith.includes(displayProfile.id) || false;
+  const userPosts = posts.filter(post => post.userId === displayProfile.id);
+  const userReels = reels.filter(reel => reel.userId === displayProfile.id);
+
+  const handleSwap = () => {
+    if (!isOwnProfile) {
+      toggleSwap(displayProfile.id);
+    }
+  };
+
+  const handleMessage = () => {
+    if (!isOwnProfile) {
+      addChatUser(displayProfile.id);
+    }
+  };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-8">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 rounded-3xl p-8 text-white shadow-2xl">
-        <div className="flex flex-col md:flex-row md:items-center space-y-6 md:space-y-0 md:space-x-8">
+    <div className="max-w-md mx-auto bg-white min-h-screen">
+      {/* Profile Header */}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center space-x-4 mb-4">
           <img
             src={displayProfile.avatar}
             alt={displayProfile.name}
-            className="w-32 h-32 rounded-full object-cover mx-auto md:mx-0 ring-4 ring-white/30 shadow-2xl"
+            className="w-20 h-20 rounded-full object-cover ring-4 ring-purple-100"
           />
           
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start space-x-3 mb-3">
-              <h1 className="text-3xl font-bold text-white">{displayProfile.name}</h1>
+          <div className="flex-1">
+            <div className="flex items-center space-x-2 mb-2">
+              <h1 className="text-xl font-bold text-gray-900">{displayProfile.name}</h1>
               {displayProfile.badges.includes('Verified') && (
-                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                  <Star className="w-5 h-5 text-white fill-current" />
-                </div>
+                <Star className="w-5 h-5 text-blue-500 fill-current" />
               )}
             </div>
             
-            <p className="text-white/90 mb-6 text-lg font-medium">{displayProfile.bio || "Building skills, one swap at a time ✨"}</p>
-            
-            <div className="flex flex-wrap justify-center md:justify-start gap-8 mb-6">
-              <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-                <div className="font-bold text-2xl text-white">{displayProfile.swappers}</div>
-                <div className="text-white/80 text-sm font-medium">Swappers</div>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="font-bold text-gray-900">{userPosts.length + userReels.length}</div>
+                <div className="text-xs text-gray-600">posts</div>
               </div>
-              <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-                <div className="font-bold text-2xl text-white">{displayProfile.swapping}</div>
-                <div className="text-white/80 text-sm font-medium">Swapping</div>
+              <div>
+                <div className="font-bold text-gray-900">{displayProfile.swappers || 0}</div>
+                <div className="text-xs text-gray-600">swappers</div>
               </div>
-              <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-                <div className="font-bold text-2xl text-yellow-300">{displayProfile.skillCoins}</div>
-                <div className="text-white/80 text-sm font-medium">SkillCoins</div>
-              </div>
-              <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-                <div className="font-bold text-2xl text-blue-300">Level {displayProfile.level}</div>
-                <div className="text-white/80 text-sm font-medium">Mentor</div>
+              <div>
+                <div className="font-bold text-gray-900">{displayProfile.swapping || 0}</div>
+                <div className="text-xs text-gray-600">swapping</div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Bio */}
+        <div className="mb-4">
+          <p className="text-gray-900 leading-relaxed">
+            {displayProfile.bio || "Building skills, one swap at a time ✨"}
+          </p>
+        </div>
+
+        {/* Skills */}
+        <div className="space-y-3 mb-6">
+          {displayProfile.teachSkills.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Can Teach</h3>
+              <div className="flex flex-wrap gap-2">
+                {displayProfile.teachSkills.slice(0, 3).map((skill, index) => (
+                  <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    🎓 {skill.name}
+                  </span>
+                ))}
+                {displayProfile.teachSkills.length > 3 && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                    +{displayProfile.teachSkills.length - 3} more
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
           
-          <div className="flex flex-col space-y-4">
-            {isOwnProfile ? (
-              <>
-                <button className="flex items-center justify-center space-x-2 px-8 py-4 bg-white/20 backdrop-blur-sm text-white rounded-2xl hover:bg-white/30 transition-all font-bold">
-                  <Settings className="w-6 h-6" />
-                  <span>Edit Profile</span>
-                </button>
-                <button className="flex items-center justify-center space-x-2 px-8 py-4 border-2 border-white/30 text-white rounded-2xl hover:bg-white/10 transition-all font-bold">
-                  <Share2 className="w-6 h-6" />
-                  <span>Share</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="flex items-center justify-center space-x-2 px-8 py-4 bg-white text-purple-600 rounded-2xl hover:bg-gray-50 transition-all font-bold shadow-lg">
-                  <Users className="w-6 h-6" />
-                  <span>Connect</span>
-                </button>
-                <button className="flex items-center justify-center space-x-2 px-8 py-4 border-2 border-white/30 text-white rounded-2xl hover:bg-white/10 transition-all font-bold">
-                  <MessageCircle className="w-6 h-6" />
-                  <span>Message</span>
-                </button>
-              </>
-            )}
-          </div>
+          {displayProfile.learnSkills.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Wants to Learn</h3>
+              <div className="flex flex-wrap gap-2">
+                {displayProfile.learnSkills.slice(0, 3).map((skill, index) => (
+                  <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    📚 {skill.name}
+                  </span>
+                ))}
+                {displayProfile.learnSkills.length > 3 && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                    +{displayProfile.learnSkills.length - 3} more
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex space-x-3">
+          {isOwnProfile ? (
+            <>
+              <button className="flex-1 bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                Edit Profile
+              </button>
+              <button className="flex-1 bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                Share Profile
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleSwap}
+                className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
+                  isSwapping
+                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                }`}
+              >
+                {isSwapping ? 'Swapping' : 'Swap'}
+              </button>
+              <button
+                onClick={handleMessage}
+                className="flex-1 bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+              >
+                Message
+              </button>
+              <button className="bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                <Video className="w-5 h-5" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Badges */}
-      <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-          <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center mr-3">
-            <Award className="w-5 h-5 text-white" />
-          </div>
-          Achievements
-        </h2>
-        <div className="flex flex-wrap gap-4">
-          {displayProfile.badges.map((badge, index) => (
-            <div key={index} className="flex items-center space-x-3 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 px-6 py-3 rounded-2xl shadow-sm">
-              <Award className="w-5 h-5 text-yellow-600" />
-              <span className="text-yellow-800 font-bold">{badge}</span>
-            </div>
-          ))}
-          <div className="flex items-center space-x-3 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 px-6 py-3 rounded-2xl shadow-sm">
-            <Star className="w-5 h-5 text-purple-600" />
-            <span className="text-purple-800 font-bold">Active Learner</span>
-          </div>
+      {/* Content Tabs */}
+      <div className="border-b border-gray-100">
+        <div className="flex">
+          <button
+            onClick={() => setActiveTab('posts')}
+            className={`flex-1 py-3 flex items-center justify-center space-x-2 ${
+              activeTab === 'posts'
+                ? 'border-b-2 border-purple-600 text-purple-600'
+                : 'text-gray-500'
+            }`}
+          >
+            <Grid className="w-5 h-5" />
+            <span className="font-medium">Posts</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('sparks')}
+            className={`flex-1 py-3 flex items-center justify-center space-x-2 ${
+              activeTab === 'sparks'
+                ? 'border-b-2 border-purple-600 text-purple-600'
+                : 'text-gray-500'
+            }`}
+          >
+            <Play className="w-5 h-5" />
+            <span className="font-medium">Sparks</span>
+          </button>
         </div>
       </div>
 
-      {/* Skills Grid */}
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Teaching Skills */}
-        <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-            <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg flex items-center justify-center mr-3">
-              <span className="text-white text-sm font-bold">T</span>
+      {/* Content Grid */}
+      <div className="p-1">
+        {activeTab === 'posts' ? (
+          userPosts.length > 0 ? (
+            <div className="grid grid-cols-3 gap-1">
+              {userPosts.map(post => (
+                <div key={post.id} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                  {post.image ? (
+                    <img
+                      src={post.image}
+                      alt="Post"
+                      className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center p-2">
+                      <p className="text-xs text-gray-700 text-center line-clamp-4 font-medium">
+                        {post.content}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-            Can Teach
-          </h2>
-          <div className="space-y-4">
-            {displayProfile.teachSkills.length > 0 ? (
-              displayProfile.teachSkills.map((skill, index) => (
-                <div key={index} className="flex items-center justify-between p-5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-100 hover:shadow-md transition-all">
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-lg">{skill.name}</h3>
-                    <p className="text-green-600 text-sm font-semibold">Level {skill.level} • Expert</p>
-                  </div>
-                  <div className="flex items-center space-x-2 bg-yellow-100 px-3 py-2 rounded-xl">
-                    <Zap className="w-5 h-5 text-yellow-600" />
-                    <span className="text-sm font-bold text-yellow-800">25 coins/hr</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-12 bg-gradient-to-r from-gray-50 to-green-50 rounded-2xl">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">🎓</span>
-                </div>
-                <p className="text-gray-600 font-medium">No teaching skills added yet</p>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Grid className="w-8 h-8 text-gray-400" />
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Learning Skills */}
-        <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
-              <span className="text-white text-sm font-bold">L</span>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">No posts yet</h3>
+              <p className="text-gray-600">
+                {isOwnProfile ? 'Share your first post!' : 'No posts to show'}
+              </p>
             </div>
-            Wants to Learn
-          </h2>
-          <div className="space-y-4">
-            {displayProfile.learnSkills.length > 0 ? (
-              displayProfile.learnSkills.map((skill, index) => (
-                <div key={index} className="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 hover:shadow-md transition-all">
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-lg">{skill.name}</h3>
-                    <p className="text-blue-600 text-sm font-semibold">Beginner • Eager to learn</p>
+          )
+        ) : (
+          userReels.length > 0 ? (
+            <div className="grid grid-cols-3 gap-1">
+              {userReels.map(reel => (
+                <div key={reel.id} className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
+                  <div className="w-full h-full bg-gradient-to-br from-purple-200 to-pink-200 flex items-center justify-center">
+                    <Play className="w-8 h-8 text-white" />
                   </div>
-                  <div className="flex items-center space-x-2 bg-yellow-100 px-3 py-2 rounded-xl">
-                    <Zap className="w-5 h-5 text-yellow-600" />
-                    <span className="text-sm font-bold text-yellow-800">20 coins/hr</span>
+                  <div className="absolute bottom-1 left-1 right-1">
+                    <p className="text-xs text-white font-medium line-clamp-2 bg-black/50 rounded p-1">
+                      {reel.content}
+                    </p>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-12 bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">📚</span>
-                </div>
-                <p className="text-gray-600 font-medium">No learning goals added yet</p>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Play className="w-8 h-8 text-gray-400" />
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Activity</h2>
-        <div className="space-y-6">
-          <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <Zap className="w-7 h-7 text-white" />
+              <h3 className="text-lg font-bold text-gray-900 mb-2">No sparks yet</h3>
+              <p className="text-gray-600">
+                {isOwnProfile ? 'Create your first spark!' : 'No sparks to show'}
+              </p>
             </div>
-            <div>
-              <p className="text-gray-900 font-bold text-lg">Earned 25 SkillCoins teaching React</p>
-              <p className="text-gray-500 font-medium">2 hours ago</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <Award className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <p className="text-gray-900 font-bold text-lg">Completed JavaScript Basics certificate</p>
-              <p className="text-gray-500 font-medium">Yesterday</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 bg-gradient-to-r from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <Users className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <p className="text-gray-900 font-bold text-lg">Connected with new skill partner</p>
-              <p className="text-gray-500 font-medium">3 days ago</p>
-            </div>
-          </div>
-        </div>
+          )
+        )}
       </div>
     </div>
   );
