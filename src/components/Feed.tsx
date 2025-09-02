@@ -208,7 +208,6 @@ const Feed: React.FC = () => {
               <Plus className="w-10 h-10 text-purple-600" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Welcome to SkillSwape!</h3>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Welcome to SkillSwap!</h3>
             <p className="text-gray-600 mb-6">Start sharing your knowledge and connect with learners worldwide</p>
             <button
               onClick={() => setShowCreatePost(true)}

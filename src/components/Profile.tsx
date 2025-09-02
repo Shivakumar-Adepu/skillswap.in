@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { usePost } from '../contexts/PostContext';
-import { MessageCircle, Video, Star, Zap, Award, Users, Settings, Share2, Grid, Play } from 'lucide-react';
+import { MessageCircle, Video, Star, Zap, Award, Users, Settings, Share2, Grid, Play, Camera, Plus } from 'lucide-react';
 
 const Profile: React.FC = () => {
   const { userId } = useParams();
@@ -43,6 +43,11 @@ const Profile: React.FC = () => {
     if (!isOwnProfile) {
       addChatUser(displayProfile.id);
     }
+  };
+
+  const handleVideoCall = () => {
+    // This would integrate with WebRTC for live video sessions
+    alert('Video call feature coming soon!');
   };
 
   return (
@@ -96,7 +101,7 @@ const Profile: React.FC = () => {
               <div className="flex flex-wrap gap-2">
                 {displayProfile.teachSkills.slice(0, 3).map((skill, index) => (
                   <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    🎓 {skill.name}
+                    🎓 {skill.name} • Level {skill.level}
                   </span>
                 ))}
                 {displayProfile.teachSkills.length > 3 && (
@@ -114,7 +119,7 @@ const Profile: React.FC = () => {
               <div className="flex flex-wrap gap-2">
                 {displayProfile.learnSkills.slice(0, 3).map((skill, index) => (
                   <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    📚 {skill.name}
+                    📚 {skill.name} • Level {skill.level}
                   </span>
                 ))}
                 {displayProfile.learnSkills.length > 3 && (
@@ -152,11 +157,15 @@ const Profile: React.FC = () => {
               </button>
               <button
                 onClick={handleMessage}
-                className="flex-1 bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                className="bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center space-x-2"
               >
-                Message
+                <MessageCircle className="w-4 h-4" />
+                <span>Chat</span>
               </button>
-              <button className="bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+              <button
+                onClick={handleVideoCall}
+                className="bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+              >
                 <Video className="w-5 h-5" />
               </button>
             </>
@@ -221,15 +230,16 @@ const Profile: React.FC = () => {
                 <Grid className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">No posts yet</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-4">
                 {isOwnProfile ? 'Share your first post!' : `${displayProfile.name} hasn't posted yet`}
               </p>
               {isOwnProfile && (
                 <Link 
                   to="/home"
-                  className="inline-block mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                  className="inline-flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
                 >
-                  Create Post
+                  <Plus className="w-4 h-4" />
+                  <span>Create Post</span>
                 </Link>
               )}
             </div>
@@ -256,15 +266,16 @@ const Profile: React.FC = () => {
                 <Play className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">No sparks yet</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-4">
                 {isOwnProfile ? 'Create your first spark!' : `${displayProfile.name} hasn't created sparks yet`}
               </p>
               {isOwnProfile && (
                 <Link 
                   to="/sparks"
-                  className="inline-block mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                  className="inline-flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
                 >
-                  Create Spark
+                  <Camera className="w-4 h-4" />
+                  <span>Create Spark</span>
                 </Link>
               )}
             </div>
