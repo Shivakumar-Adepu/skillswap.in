@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Check if user is logged in
-    const savedUser = localStorage.getItem('skillswape_user');
+    const savedUser = localStorage.getItem('skillswap_user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     
     setUser(mockUser);
-    localStorage.setItem('skillswape_user', JSON.stringify(mockUser));
+    localStorage.setItem('skillswap_user', JSON.stringify(mockUser));
     setIsLoading(false);
   };
 
@@ -65,13 +65,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     
     setUser(mockUser);
-    localStorage.setItem('skillswape_user', JSON.stringify(mockUser));
+    localStorage.setItem('skillswap_user', JSON.stringify(mockUser));
     setIsLoading(false);
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('skillswape_user');
+    localStorage.removeItem('skillswap_user');
   };
 
   return (

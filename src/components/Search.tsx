@@ -93,7 +93,7 @@ const Search: React.FC = () => {
                   <p className="text-sm text-gray-600 truncate">
                     {user.teachSkills.length > 0 
                       ? `Teaches ${user.teachSkills.slice(0, 2).map(s => s.name).join(', ')}`
-                      : 'New to SkillSwape'
+                      : 'New to SkillSwap'
                     }
                   </p>
                 </Link>

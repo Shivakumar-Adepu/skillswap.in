@@ -102,6 +102,7 @@ const Onboarding: React.FC = () => {
                 <span className="text-2xl">👋</span>
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Welcome to SkillSwape!</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Welcome to SkillSwap!</h2>
               <p className="text-gray-600 text-lg">Let's set up your profile so you can start swapping skills</p>
             </div>
             

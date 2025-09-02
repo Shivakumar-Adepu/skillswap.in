@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Zap, MessageCircle, Users } from 'lucide-react';
+import { Home, Zap, MessageCircle, Users, User } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
 
 const Navigation: React.FC = () => {
@@ -11,7 +11,8 @@ const Navigation: React.FC = () => {
     { path: '/home', icon: Home, label: 'Home' },
     { path: '/sparks', icon: Zap, label: 'Sparks' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
-    { path: '/hubs', icon: Users, label: 'Hubs' }
+    { path: '/hubs', icon: Users, label: 'Hubs' },
+    { path: '/profile', icon: User, label: 'Profile' }
   ];
 
   return (
@@ -20,7 +21,8 @@ const Navigation: React.FC = () => {
         <div className="flex justify-around">
           {navItems.map(({ path, icon: Icon, label }) => {
             const isActive = location.pathname === path || 
-                           (path === '/home' && location.pathname === '/dashboard');
+                           (path === '/home' && location.pathname === '/dashboard') ||
+                           (path === '/profile' && location.pathname.startsWith('/profile'));
             
             return (
               <Link

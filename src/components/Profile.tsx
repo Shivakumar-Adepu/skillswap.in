@@ -222,8 +222,16 @@ const Profile: React.FC = () => {
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">No posts yet</h3>
               <p className="text-gray-600">
-                {isOwnProfile ? 'Share your first post!' : 'No posts to show'}
+                {isOwnProfile ? 'Share your first post!' : `${displayProfile.name} hasn't posted yet`}
               </p>
+              {isOwnProfile && (
+                <Link 
+                  to="/home"
+                  className="inline-block mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                >
+                  Create Post
+                </Link>
+              )}
             </div>
           )
         ) : (
@@ -249,8 +257,16 @@ const Profile: React.FC = () => {
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">No sparks yet</h3>
               <p className="text-gray-600">
-                {isOwnProfile ? 'Create your first spark!' : 'No sparks to show'}
+                {isOwnProfile ? 'Create your first spark!' : `${displayProfile.name} hasn't created sparks yet`}
               </p>
+              {isOwnProfile && (
+                <Link 
+                  to="/sparks"
+                  className="inline-block mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                >
+                  Create Spark
+                </Link>
+              )}
             </div>
           )
         )}

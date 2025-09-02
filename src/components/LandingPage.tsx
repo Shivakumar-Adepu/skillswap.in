@@ -38,7 +38,7 @@ const LandingPage: React.FC = () => {
             <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
               <Zap className="w-6 h-6 text-white" />
             </div>
-            <span className="text-white font-bold text-2xl">SkillSwape</span>
+            <span className="text-white font-bold text-2xl">SkillSwap</span>
           </div>
           <button
             onClick={() => setIsLogin(!isLogin)}
@@ -100,7 +100,7 @@ const LandingPage: React.FC = () => {
           <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-10 shadow-2xl border border-white/20">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                {isLogin ? 'Welcome Back' : 'Join SkillSwape'}
+                {isLogin ? 'Welcome Back' : 'Join SkillSwap'}
               </h2>
               <p className="text-gray-600 text-lg">
                 {isLogin ? 'Continue your learning journey' : 'Start swapping skills today'}

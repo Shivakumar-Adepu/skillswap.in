@@ -15,7 +15,7 @@ const Header: React.FC = () => {
           <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
-          <span className="font-bold text-xl text-gray-900">SkillSwape</span>
+          <span className="font-bold text-xl text-gray-900">SkillSwap</span>
         </Link>
 
         {/* Search Bar */}

@@ -50,20 +50,20 @@ export const PostProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const loadPosts = () => {
-    const savedPosts = localStorage.getItem('skillswape_posts');
+    const savedPosts = localStorage.getItem('skillswap_posts');
     if (savedPosts) {
       setPosts(JSON.parse(savedPosts));
     } else {
       // Initialize with some sample posts for demonstration
       const samplePosts: Post[] = [];
       setPosts(samplePosts);
-      localStorage.setItem('skillswape_posts', JSON.stringify(samplePosts));
+      localStorage.setItem('skillswap_posts', JSON.stringify(samplePosts));
     }
   };
 
   const savePosts = (updatedPosts: Post[]) => {
     setPosts(updatedPosts);
-    localStorage.setItem('skillswape_posts', JSON.stringify(updatedPosts));
+    localStorage.setItem('skillswap_posts', JSON.stringify(updatedPosts));
   };
 
   const addPost = (content: string, image?: string, type: 'post' | 'reel' = 'post', category: 'job' | 'education' | 'technology' = 'education') => {
