@@ -67,7 +67,17 @@ function App() {
                 } 
               />
               <Route 
-                path="/profile/:userId?" 
+                path="/profile/:userId?"
+                element={
+                  <div className="pb-20 pt-16">
+                    <Header />
+                    <Profile />
+                    <Navigation />
+                  </div>
+                } 
+              />
+              <Route 
+                path="/profile" 
                 element={
                   <div className="pb-20 pt-16">
                     <Header />
