@@ -10,7 +10,8 @@ import {
   Briefcase,
   GraduationCap,
   Cpu,
-  Camera
+  Camera,
+  X
 } from 'lucide-react';
 
 const Feed: React.FC = () => {
@@ -73,33 +74,6 @@ const Feed: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto bg-white min-h-screen">
-      {/* Stories Section - Other Users Only */}
-      {allUsers.length > 0 && (
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex space-x-4 overflow-x-auto pb-2">
-            {allUsers.slice(0, 10).map((user) => (
-              <div key={user.id} className="flex flex-col items-center space-y-2 flex-shrink-0">
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500">
-                    <img
-                      src={user.avatar}
-                      alt={user.name}
-                      className="w-full h-full rounded-full object-cover border-2 border-white"
-                    />
-                  </div>
-                  {user.isOnline && (
-                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-                  )}
-                </div>
-                <span className="text-xs text-gray-600 font-medium truncate w-16 text-center">
-                  {user.name.split(' ')[0]}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Create Post Button */}
       <div className="p-4 border-b border-gray-100">
         <button
@@ -207,7 +181,7 @@ const Feed: React.FC = () => {
             <div className="w-20 h-20 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Plus className="w-10 h-10 text-purple-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Welcome to SkillSwape!</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Welcome to SkillSwap!</h3>
             <p className="text-gray-600 mb-6">Start sharing your knowledge and connect with learners worldwide</p>
             <button
               onClick={() => setShowCreatePost(true)}
@@ -286,7 +260,7 @@ const Feed: React.FC = () => {
                     onClick={() => setSelectedImage(null)}
                     className="absolute top-2 right-2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
                   >
-                    ×
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               )}

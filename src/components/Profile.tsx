@@ -2,13 +2,18 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { usePost } from '../contexts/PostContext';
-import { MessageCircle, Video, Star, Zap, Award, Users, Settings, Share2, Grid, Play, Camera, Plus } from 'lucide-react';
+import { MessageCircle, Video, Star, Zap, Award, Users, Settings, Share2, Grid, Play, Camera, Plus, Edit } from 'lucide-react';
 
 const Profile: React.FC = () => {
   const { userId } = useParams();
   const { profile, getUserById, toggleSwap, addChatUser } = useUser();
   const { posts, reels } = usePost();
   const [activeTab, setActiveTab] = useState<'posts' | 'sparks'>('posts');
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editData, setEditData] = useState({
+    bio: profile?.bio || '',
+    name: profile?.name || ''
+  });
   
   const isOwnProfile = !userId || userId === profile?.id;
   const displayProfile = isOwnProfile ? profile : getUserById(userId);
@@ -46,8 +51,15 @@ const Profile: React.FC = () => {
   };
 
   const handleVideoCall = () => {
-    // This would integrate with WebRTC for live video sessions
-    alert('Video call feature coming soon!');
+    alert('Starting live learning session...');
+  };
+
+  const handleEditProfile = () => {
+    if (profile) {
+      profile.bio = editData.bio;
+      profile.name = editData.name;
+      setShowEditProfile(false);
+    }
   };
 
   return (
@@ -64,9 +76,13 @@ const Profile: React.FC = () => {
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-2">
               <h1 className="text-xl font-bold text-gray-900">{displayProfile.name}</h1>
-              {displayProfile.badges.includes('Verified') && (
+              {displayProfile.badges?.includes('Verified') && (
                 <Star className="w-5 h-5 text-blue-500 fill-current" />
               )}
+              <div className="flex items-center space-x-1 bg-gradient-to-r from-yellow-400 to-orange-500 px-2 py-1 rounded-full">
+                <Zap className="w-3 h-3 text-white" />
+                <span className="text-xs font-bold text-white">{displayProfile.level}</span>
+              </div>
             </div>
             
             <div className="grid grid-cols-3 gap-4 text-center">
@@ -95,7 +111,7 @@ const Profile: React.FC = () => {
 
         {/* Skills */}
         <div className="space-y-3 mb-6">
-          {displayProfile.teachSkills.length > 0 && (
+          {displayProfile.teachSkills && displayProfile.teachSkills.length > 0 && (
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Can Teach</h3>
               <div className="flex flex-wrap gap-2">
@@ -113,7 +129,7 @@ const Profile: React.FC = () => {
             </div>
           )}
           
-          {displayProfile.learnSkills.length > 0 && (
+          {displayProfile.learnSkills && displayProfile.learnSkills.length > 0 && (
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Wants to Learn</h3>
               <div className="flex flex-wrap gap-2">
@@ -136,11 +152,16 @@ const Profile: React.FC = () => {
         <div className="flex space-x-3">
           {isOwnProfile ? (
             <>
-              <button className="flex-1 bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
-                Edit Profile
+              <button 
+                onClick={() => setShowEditProfile(true)}
+                className="flex-1 bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
+              >
+                <Edit className="w-4 h-4" />
+                <span>Edit Profile</span>
               </button>
-              <button className="flex-1 bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
-                Share Profile
+              <button className="flex-1 bg-gray-100 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2">
+                <Share2 className="w-4 h-4" />
+                <span>Share</span>
               </button>
             </>
           ) : (
@@ -282,6 +303,54 @@ const Profile: React.FC = () => {
           )
         )}
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditProfile && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end">
+          <div className="bg-white rounded-t-3xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setShowEditProfile(false)}
+                  className="text-gray-600 hover:text-gray-800 font-medium"
+                >
+                  Cancel
+                </button>
+                <h2 className="text-lg font-bold text-gray-900">Edit Profile</h2>
+                <button
+                  onClick={handleEditProfile}
+                  className="text-purple-600 hover:text-purple-700 font-bold"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <input
+                  type="text"
+                  value={editData.name}
+                  onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                <textarea
+                  value={editData.bio}
+                  onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                  rows={3}
+                  placeholder="Tell us about yourself..."
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

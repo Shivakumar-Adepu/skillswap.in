@@ -13,6 +13,10 @@ import Search from './components/Search';
 import SkillWallet from './components/SkillWallet';
 import Chat from './components/Chat';
 import Onboarding from './components/Onboarding';
+import Notifications from './components/Notifications';
+import LiveSession from './components/LiveSession';
+import SkillMarketplace from './components/SkillMarketplace';
+import Achievements from './components/Achievements';
 import Navigation from './components/Navigation';
 import Header from './components/Header';
 
@@ -102,7 +106,40 @@ function App() {
                   <div className="pb-20 pt-16">
                     <Header />
                     <Search />
-                    <Chat />
+                    <Navigation />
+                  </div>
+                } 
+              />
+              <Route 
+                path="/notifications" 
+                element={
+                  <div className="pb-20 pt-16">
+                    <Header />
+                    <Notifications />
+                    <Navigation />
+                  </div>
+                } 
+              />
+              <Route 
+                path="/live/:sessionId?" 
+                element={<LiveSession />} 
+              />
+              <Route 
+                path="/marketplace" 
+                element={
+                  <div className="pb-20 pt-16">
+                    <Header />
+                    <SkillMarketplace />
+                    <Navigation />
+                  </div>
+                } 
+              />
+              <Route 
+                path="/achievements" 
+                element={
+                  <div className="pb-20 pt-16">
+                    <Header />
+                    <Achievements />
                     <Navigation />
                   </div>
                 } 
