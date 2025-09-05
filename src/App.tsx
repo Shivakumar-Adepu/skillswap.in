@@ -13,6 +13,7 @@ import Search from './components/Search';
 import SkillWallet from './components/SkillWallet';
 import Chat from './components/Chat';
 import Onboarding from './components/Onboarding';
+import OnboardingMatching from './components/OnboardingMatching';
 import Notifications from './components/Notifications';
 import LiveSession from './components/LiveSession';
 import SkillMarketplace from './components/SkillMarketplace';
@@ -30,6 +31,7 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/onboarding-matching" element={<OnboardingMatching />} />
               <Route 
                 path="/home" 
                 element={
