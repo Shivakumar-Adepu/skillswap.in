@@ -13,6 +13,9 @@ interface UserProfile {
   name: string;
   bio: string;
   avatar: string;
+  location?: string;
+  email?: string;
+  website?: string;
   skillCoins: number;
   level: number;
   badges: string[];
@@ -31,6 +34,7 @@ interface PublicUser {
   name: string;
   bio: string;
   avatar: string;
+  location?: string;
   teachSkills: Skill[];
   learnSkills: Skill[];
   rating: number;
