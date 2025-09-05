@@ -1,36 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { usePost } from '../contexts/PostContext';
 import { useUser } from '../contexts/UserContext';
-import { 
-  Plus, 
-  MoreHorizontal, 
-  Bookmark, 
-  Send,
-  Image as ImageIcon,
-  Briefcase,
-  GraduationCap,
-  Cpu,
-  Camera,
-  X,
-  TrendingUp,
-  Zap,
-  Users,
-  Clock,
-  Play,
-  ChevronLeft,
-  ChevronRight,
-  Fire,
-  Target,
-  Award,
-  MessageCircle,
-  Video,
-  Calendar,
-  Star,
-  ArrowRight,
-  Lightbulb,
-  Trophy,
-  Eye
-} from 'lucide-react';
+import { Plus, MoreHorizontal, Bookmark, Send, Image as ImageIcon, Briefcase, GraduationCap, Cpu, Camera, X, TrendingUp, Zap, Users, Clock, Play, ChevronLeft, ChevronRight, Siren as Fire, Target, Award, MessageCircle, Video, Calendar, Star, ArrowRight, Lightbulb, Trophy, Eye } from 'lucide-react';
 
 const DAILY_CHALLENGES = [
   {
