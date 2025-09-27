@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
 import { PostProvider } from './contexts/PostContext';
@@ -23,135 +24,137 @@ import Header from './components/Header';
 
 function App() {
   return (
-    <AuthProvider>
-      <UserProvider>
-        <PostProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/onboarding-matching" element={<OnboardingMatching />} />
-              <Route 
-                path="/home" 
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <Feed />
-                    <Navigation />
-                  </div>
-                } 
-              />
-              <Route 
-                path="/sparks" 
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <Reels />
-                    <Navigation />
-                  </div>
-                } 
-              />
-              <Route 
-                path="/chat/:chatId?" 
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <Chat />
-                    <Navigation />
-                  </div>
-                } 
-              />
-              <Route 
-                path="/hubs" 
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <Groups />
-                    <Navigation />
-                  </div>
-                } 
-              />
-              <Route 
-                path="/profile/:userId?"
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <Profile />
-                    <Navigation />
-                  </div>
-                } 
-              />
-              <Route 
-                path="/profile" 
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <Profile />
-                    <Navigation />
-                  </div>
-                } 
-              />
-              <Route 
-                path="/wallet" 
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <SkillWallet />
-                    <Navigation />
-                  </div>
-                } 
-              />
-              <Route 
-                path="/search" 
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <Search />
-                    <Navigation />
-                  </div>
-                } 
-              />
-              <Route 
-                path="/notifications" 
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <Notifications />
-                    <Navigation />
-                  </div>
-                } 
-              />
-              <Route 
-                path="/live/:sessionId?" 
-                element={<LiveSession />} 
-              />
-              <Route 
-                path="/marketplace" 
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <SkillMarketplace />
-                    <Navigation />
-                  </div>
-                } 
-              />
-              <Route 
-                path="/achievements" 
-                element={
-                  <div className="pb-20 pt-16">
-                    <Header />
-                    <Achievements />
-                    <Navigation />
-                  </div>
-                } 
-              />
-            </Routes>
-          </div>
-        </Router>
-        </PostProvider>
-      </UserProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <UserProvider>
+          <PostProvider>
+          <Router>
+            <div className="min-h-screen bg-gray-50">
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/onboarding-matching" element={<OnboardingMatching />} />
+                <Route 
+                  path="/home" 
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <Feed />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+                <Route 
+                  path="/sparks" 
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <Reels />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+                <Route 
+                  path="/chat/:chatId?" 
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <Chat />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+                <Route 
+                  path="/hubs" 
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <Groups />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+                <Route 
+                  path="/profile/:userId?"
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <Profile />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <Profile />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+                <Route 
+                  path="/wallet" 
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <SkillWallet />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+                <Route 
+                  path="/search" 
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <Search />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+                <Route 
+                  path="/notifications" 
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <Notifications />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+                <Route 
+                  path="/live/:sessionId?" 
+                  element={<LiveSession />} 
+                />
+                <Route 
+                  path="/marketplace" 
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <SkillMarketplace />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+                <Route 
+                  path="/achievements" 
+                  element={
+                    <div className="pb-20 pt-16">
+                      <Header />
+                      <Achievements />
+                      <Navigation />
+                    </div>
+                  } 
+                />
+              </Routes>
+            </div>
+          </Router>
+          </PostProvider>
+        </UserProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
